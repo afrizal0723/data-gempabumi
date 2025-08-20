@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Gempa Terkini</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f9fafb;
+            color: #374151;
+            padding: 0.5rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.875rem;
+        }
+        th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <h2 class="text-xl font-bold mb-2">Gempa Bumi Terkini</h2>
+    <div id="gempa-container">Memuat data...</div>
+
+    <script>
+        // Fungsi untuk mengambil dan menampilkan data gempa
+        async function fetchData() {
+            const container = document.getElementById('gempa-container');
+            // URL data JSON dari repositori BMKG
+            const dataUrl = 'https://raw.githubusercontent.com/infoBMKG/data-gempabumi/main/autogempa.json';
+            // Menggunakan proxy untuk menghindari masalah CORS (Cross-Origin Resource Sharing)
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(dataUrl)}`;
+
+            try {
+                // Mengambil data JSON melalui proxy
+                const response = await fetch(proxyUrl);
+                if (!response.ok) {
+                    throw new Error('Gagal mengambil data');
+                }
+                const data = await response.json();
+                const gempa = data.Infogempa.gempa;
+
+                // Membuat tabel HTML
+                let tableHTML = `
+                    <table class="min-w-full">
+                        <thead>
+                            <tr>
+                                <th class="px-2 py-2">Waktu</th>
+                                <th class="px-2 py-2">Magnitudo</th>
+                                <th class="px-2 py-2">Lokasi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="px-2 py-2">${gempa.Tanggal}, ${gempa.Jam}</td>
+                                <td class="px-2 py-2">${gempa.Magnitude}</td>
+                                <td class="px-2 py-2">${gempa.Wilayah}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `;
+                container.innerHTML = tableHTML;
+
+            } catch (error) {
+                container.textContent = 'Gagal memuat data gempa.';
+                console.error(error);
+            }
+        }
+
+        // Panggil fungsi saat halaman dimuat
+        fetchData();
+    </script>
+</body>
+</html>
